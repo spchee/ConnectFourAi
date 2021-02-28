@@ -4,21 +4,30 @@ using namespace std;
 #include <unordered_map>
 #include <random>
 #include "board.h"
+
+#define EXPLORATIONCONST = 1.414214
 struct Node
 {
+    Board NodeBoard;
     vector<Node*> ChildNodes; // Pointer to each child node
     vector<Node*> ParentNodes; //pointer to all parent nodes
     unsigned int Hash;
-    Node(Node* parent)
+
+    int wins = 0;
+    int simulations = 0;
+    
+    Node(Node* parent/*, PlayerPiece player, int dropPos*/)
     {
         ParentNodes.push_back(parent);
+        //NodeBoard = clone Need to figure out how to do a deep copy.
     }
 };
 
-struct NodeMap
+struct NodeMap // contains map of all nodes which have been explored
 {
     unordered_map<unsigned int, Node*> NodeMap = {};
 
+    //Creates new node if hasn't been explored.
     Node* CreateNewNode(unsigned int hash, Node* parent)
     {
         if (NodeMap.find(hash) == NodeMap.end())
@@ -52,4 +61,35 @@ class ZorbistHashing
         
         return ZorbistTable[x + y*7][player]^hash;
     }
+};
+
+
+class MCTS
+{
+    Node RootNode = Node(nullptr);
+    MCTS()
+    {
+        RootNode.Hash = 0;
+    }
+
+    int GetPossibleMoves()
+    {
+
+    }
+
+    Node* Selection()
+    {
+
+    }
+
+    PlayerPiece Simulation()
+    {
+
+    }
+
+    bool Backpropagation()
+    {
+
+    }
+
 };
