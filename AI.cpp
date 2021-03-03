@@ -15,11 +15,13 @@ struct Node
 
     int wins = 0;
     int simulations = 0;
+    PlayerPiece PlayerTurn;
     
-    Node(Node* parent/*, PlayerPiece player, int dropPos*/)
+    Node(Node* parent)
     {
         ParentNodes.push_back(parent);
-        //NodeBoard = clone Need to figure out how to do a deep copy.
+        PlayerTurn = (parent->PlayerTurn)==PlayerOne?PlayerTwo:PlayerOne;
+
     }
 };
 
@@ -55,7 +57,7 @@ class ZorbistHashing
              ZorbistTable[i][1] = distrib(gen);
         }
     }
-
+    public:
     unsigned int ReturnZorbistHash(PlayerPiece player, int x, int y, unsigned int hash)
     {
         
@@ -72,7 +74,7 @@ class MCTS
         RootNode.Hash = 0;
     }
 
-    int GetPossibleMoves()
+    vector<int> GetPossibleMoves()
     {
 
     }
@@ -90,6 +92,12 @@ class MCTS
     bool Backpropagation()
     {
 
+    }
+
+    void PlayMove()
+    {
+        //change root node
+        //playesr turn
     }
 
 };
