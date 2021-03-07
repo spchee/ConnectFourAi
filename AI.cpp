@@ -30,7 +30,7 @@ struct NodeMap // contains map of all nodes which have been explored
     unordered_map<unsigned int, Node*> NodeMap = {};
 
     //Creates new node if hasn't been explored.
-    Node* CreateNewNode(unsigned int hash, Node* parent)
+    Node* create_node(unsigned int hash, Node* parent)
     {
         if (NodeMap.find(hash) == NodeMap.end())
         {
@@ -58,7 +58,7 @@ class ZorbistHashing
         }
     }
     public:
-    unsigned int ReturnZorbistHash(PlayerPiece player, int x, int y, unsigned int hash)
+    unsigned int get_zorbist_hash(PlayerPiece player, int x, int y, unsigned int hash)
     {
         
         return ZorbistTable[x + y*7][player]^hash;
@@ -74,27 +74,27 @@ class MCTS
         RootNode.Hash = 0;
     }
 
-    vector<int> GetPossibleMoves()
+    vector<int> get_moves()
     {
 
     }
 
-    Node* Selection()
+    Node* selection()
     {
 
     }
 
-    PlayerPiece Simulation()
+    PlayerPiece simulation()
     {
 
     }
 
-    bool Backpropagation()
+    bool backpropagation()
     {
 
     }
 
-    void PlayMove()
+    void play_move()
     {
         //change root node
         //playesr turn

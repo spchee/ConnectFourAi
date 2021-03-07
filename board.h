@@ -16,13 +16,13 @@ struct Board
     array<short int, 7> BoardTop;
 
     //Insert Piece. Return True if success. Else return false
-    bool DropPiece(int x, PlayerPiece player);
+    bool drop_piece(int x, PlayerPiece player);
 
-    int Conv2dTo1d(int x, int y);
+    int flatten(int x, int y);
 
-    bool CheckWin(){}
+    bool check_win(){}
 
-    void DisplayBoard(){}
+    void display_board(){}
 
 
 };

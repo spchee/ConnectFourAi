@@ -10,12 +10,12 @@ class ConnectFourGame
         ai = AI;
     }
 
-    bool PlayerTurn(PlayerPiece player)
+    bool player_turn(PlayerPiece player)
     {
         return true;
     }
 
-    void End(PlayerPiece player)
+    void end_game(PlayerPiece player)
     {
         return;
     }

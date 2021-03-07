@@ -16,22 +16,22 @@ struct Board
     array<short int, 7> BoardTop = {5,5,5,5,5,5,5};
     
     //Insert Piece. Return True if success. Else return false
-    bool DropPiece(int x, PlayerPiece player)     
+    bool drop_piece(int x, PlayerPiece player)     
     {
         if(BoardTop[x]!= -1){
-            Board[Conv2dTo1d(x, BoardTop[x])] = player;
+            Board[flatten(x, BoardTop[x])] = player;
             BoardTop[x]--;
             return true;
         }
         else return false;
     } 
 
-    int Conv2dTo1d(int x, int y)
+    int flatten(int x, int y)
     {
         return x + y*7 ; 
     }
 
-    bool CheckWin(int xPos, PlayerPiece player)
+    bool check_win(int xPos, PlayerPiece player)
     {
         int yPos = BoardTop[xPos]+1;
 
@@ -39,11 +39,11 @@ struct Board
         for(int i = xPos>=4?xPos-3:0; i< 4 && i<= xPos; ++i )
         {
             //cout << "horiz" << endl;
-            //cout << Board[Conv2dTo1d(i,yPos)] << Board[Conv2dTo1d(i+1,yPos)] << Board[Conv2dTo1d(i+2,yPos)] << Board[Conv2dTo1d(i+3,yPos)]  << endl;
+            //cout << Board[flatten(i,yPos)] << Board[flatten(i+1,yPos)] << Board[flatten(i+2,yPos)] << Board[flatten(i+3,yPos)]  << endl;
 
-            if(Board[Conv2dTo1d(i,yPos)] == Board[Conv2dTo1d(i+1,yPos)] 
-            && Board[Conv2dTo1d(i+1,yPos)] == Board[Conv2dTo1d(i+2,yPos)] 
-            && Board[Conv2dTo1d(i+2,yPos)] == Board[Conv2dTo1d(i+3,yPos)] )
+            if(Board[flatten(i,yPos)] == Board[flatten(i+1,yPos)] 
+            && Board[flatten(i+1,yPos)] == Board[flatten(i+2,yPos)] 
+            && Board[flatten(i+2,yPos)] == Board[flatten(i+3,yPos)] )
             {
                 
                 return true;
@@ -54,17 +54,17 @@ struct Board
         if(yPos <=2) //if smaller than 2, than it cant be a complete verticle line of 4
         {
             //cout << "vert" << endl;
-            //cout << Board[Conv2dTo1d(xPos,yPos)] << Board[Conv2dTo1d(xPos,yPos+1)] << Board[Conv2dTo1d(xPos,yPos+2)] << Board[Conv2dTo1d(xPos,yPos+3)];
+            //cout << Board[flatten(xPos,yPos)] << Board[flatten(xPos,yPos+1)] << Board[flatten(xPos,yPos+2)] << Board[flatten(xPos,yPos+3)];
 
-            if(Board[Conv2dTo1d(xPos,yPos)] == Board[Conv2dTo1d(xPos,yPos+1)] 
-            && Board[Conv2dTo1d(xPos,yPos+1)] == Board[Conv2dTo1d(xPos,yPos+2)] 
-            && Board[Conv2dTo1d(xPos,yPos+2)] ==Board[Conv2dTo1d(xPos,yPos+3)])
+            if(Board[flatten(xPos,yPos)] == Board[flatten(xPos,yPos+1)] 
+            && Board[flatten(xPos,yPos+1)] == Board[flatten(xPos,yPos+2)] 
+            && Board[flatten(xPos,yPos+2)] ==Board[flatten(xPos,yPos+3)])
             {
                 return true;
             }
         }
 
-        int pos = Conv2dTo1d(xPos, yPos);
+        int pos = flatten(xPos, yPos);
 
         // diag downwards
         int i;
@@ -106,13 +106,13 @@ struct Board
         return false;
     }
 
-    void DisplayBoard()
+    void display_board()
     {
         for (int y = 0; y != 6; ++y)
         {
             for (int x = 0; x != 7; x++)
             {
-                cout << Board[Conv2dTo1d(x,y)] << " ";
+                cout << Board[flatten(x,y)] << " ";
             }
             cout << endl;
         }
@@ -129,25 +129,25 @@ int main()
     int pos;
     while (true)
     {
-        game.DisplayBoard();
+        game.display_board();
         cout << "player 1" << endl;
         cin >> pos; 
-        game.DropPiece(pos, PlayerOne);
+        game.drop_piece(pos, PlayerOne);
 
-        if (game.CheckWin(pos, PlayerOne))
+        if (game.check_win(pos, PlayerOne))
         {
-            game.DisplayBoard();
+            game.display_board();
             cout << "p1 wins";
             break;
         }
-        game.DisplayBoard();
+        game.display_board();
         cout << "player 2" << endl;
         cin >> pos; 
-        game.DropPiece(pos, PlayerTwo);
+        game.drop_piece(pos, PlayerTwo);
 
-        if (game.CheckWin(pos, PlayerTwo))
+        if (game.check_win(pos, PlayerTwo))
         {
-            game.DisplayBoard();
+            game.display_board();
             cout << "p2 wins";
             break;
         }
