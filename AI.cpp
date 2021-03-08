@@ -5,16 +5,16 @@ using namespace std;
 #include <random>
 #include "board.h"
 
-#define EXPLORATIONCONST = 1.414214
+#define EXPLORATIONCONST 1.414214
 struct Node
 {
     Board NodeBoard;
-    vector<Node*> ChildNodes; // Pointer to each child node
-    vector<Node*> ParentNodes; //pointer to all parent nodes
+    vector<Node*> ChildNodes; // Pointers to each child node
+    vector<Node*> ParentNodes; // Pointers to all parent nodes
     unsigned int Hash;
 
     int wins = 0;
-    int simulations = 0;
+    int visits = 0;
     PlayerPiece PlayerTurn;
     
     Node(Node* parent)
@@ -25,18 +25,18 @@ struct Node
     }
 };
 
-struct NodeMap // contains map of all nodes which have been explored
+struct TranspositionTable // contains map of all nodes which have been explored
 {
-    unordered_map<unsigned int, Node*> NodeMap = {};
+    unordered_map<unsigned int, Node*> table = {};
 
     //Creates new node if hasn't been explored.
     Node* create_node(unsigned int hash, Node* parent)
     {
-        if (NodeMap.find(hash) == NodeMap.end())
+        if (table.find(hash) == table.end())
         {
-            NodeMap[hash] = new Node(parent);
+            table[hash] = new Node(parent);
         }
-        return NodeMap[hash];
+        return table[hash];
     }
 };
 
@@ -69,20 +69,54 @@ class ZorbistHashing
 class MCTS
 {
     Node RootNode = Node(nullptr);
+    Board RootBoard = Board();
+
+    Node CurrentNode = RootNode;
+    Board CurrentBoard = RootBoard;
+    
     MCTS()
     {
         RootNode.Hash = 0;
     }
 
+    
+
     vector<int> get_moves()
     {
+        vector<int> ValidMoves = {};
+        for(int i = 0; i!=7; ++i)
+        {
+            if(CurrentBoard.BoardTop[i] != -1)
+            {
+                ValidMoves.push_back(i);
+            }
+        }
+        return ValidMoves;
 
+    }
+
+    double calc_UCT(Node node)
+    {
+        /*  UCT normally only works for trees where nodes have a single parent, 
+            so I'm not sure if totally all of the parent visits up will work    */
+
+        int ParentVisits = 0; 
+        for(int i = 0; i != node.ParentNodes.size(); ++i) 
+        {
+            ParentVisits += node.ParentNodes[i] -> visits;
+        }
+
+        double UCT = node.wins / node.visits + EXPLORATIONCONST * sqrt(log(ParentVisits)/ node.visits);
+
+        return UCT;
     }
 
     Node* selection()
     {
 
+
     }
+
 
     PlayerPiece simulation()
     {
