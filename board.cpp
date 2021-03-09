@@ -12,14 +12,14 @@ enum PlayerPiece
 using namespace std;
 struct Board
 {
-    array<PlayerPiece, 42> Board = {Empty}; // Board as a 1d array
+    array<PlayerPiece, 42> board = {Empty}; // board as a 1d array
     array<short int, 7> BoardTop = {5,5,5,5,5,5,5};
     
     //Insert Piece. Return True if success. Else return false
     bool drop_piece(int x, PlayerPiece player)     
     {
         if(BoardTop[x]!= -1){
-            Board[flatten(x, BoardTop[x])] = player;
+            board[flatten(x, BoardTop[x])] = player;
             BoardTop[x]--;
             return true;
         }
@@ -39,11 +39,11 @@ struct Board
         for(int i = xPos>=4?xPos-3:0; i< 4 && i<= xPos; ++i )
         {
             //cout << "horiz" << endl;
-            //cout << Board[flatten(i,yPos)] << Board[flatten(i+1,yPos)] << Board[flatten(i+2,yPos)] << Board[flatten(i+3,yPos)]  << endl;
+            //cout << board[flatten(i,yPos)] << board[flatten(i+1,yPos)] << board[flatten(i+2,yPos)] << board[flatten(i+3,yPos)]  << endl;
 
-            if(Board[flatten(i,yPos)] == Board[flatten(i+1,yPos)] 
-            && Board[flatten(i+1,yPos)] == Board[flatten(i+2,yPos)] 
-            && Board[flatten(i+2,yPos)] == Board[flatten(i+3,yPos)] )
+            if(board[flatten(i,yPos)] == board[flatten(i+1,yPos)] 
+            && board[flatten(i+1,yPos)] == board[flatten(i+2,yPos)] 
+            && board[flatten(i+2,yPos)] == board[flatten(i+3,yPos)] )
             {
                 
                 return true;
@@ -54,11 +54,11 @@ struct Board
         if(yPos <=2) //if smaller than 2, than it cant be a complete verticle line of 4
         {
             //cout << "vert" << endl;
-            //cout << Board[flatten(xPos,yPos)] << Board[flatten(xPos,yPos+1)] << Board[flatten(xPos,yPos+2)] << Board[flatten(xPos,yPos+3)];
+            //cout << board[flatten(xPos,yPos)] << board[flatten(xPos,yPos+1)] << board[flatten(xPos,yPos+2)] << board[flatten(xPos,yPos+3)];
 
-            if(Board[flatten(xPos,yPos)] == Board[flatten(xPos,yPos+1)] 
-            && Board[flatten(xPos,yPos+1)] == Board[flatten(xPos,yPos+2)] 
-            && Board[flatten(xPos,yPos+2)] ==Board[flatten(xPos,yPos+3)])
+            if(board[flatten(xPos,yPos)] == board[flatten(xPos,yPos+1)] 
+            && board[flatten(xPos,yPos+1)] == board[flatten(xPos,yPos+2)] 
+            && board[flatten(xPos,yPos+2)] ==board[flatten(xPos,yPos+3)])
             {
                 return true;
             }
@@ -73,9 +73,9 @@ struct Board
         
         do 
         {
-            if(Board[i] == Board[i + 8] 
-            && Board[i+8] == Board[i+16]
-            && Board[i+16] == Board[i+24])
+            if(board[i] == board[i + 8] 
+            && board[i+8] == board[i+16]
+            && board[i+16] == board[i+24])
             {
                 return true;
             }
@@ -91,9 +91,9 @@ struct Board
         
         do 
         {
-            if(Board[i] == Board[i - 6] 
-            && Board[i-6 ] == Board[i-12]
-            && Board[i-12] == Board[i-18])
+            if(board[i] == board[i - 6] 
+            && board[i-6 ] == board[i-12]
+            && board[i-12] == board[i-18])
             {
                 return true;
             }
@@ -112,10 +112,19 @@ struct Board
         {
             for (int x = 0; x != 7; x++)
             {
-                cout << Board[flatten(x,y)] << " ";
+                cout << board[flatten(x,y)] << " ";
             }
             cout << endl;
         }
+    }
+
+    Board* deep_copy()
+    {
+        Board copy = Board();
+        copy.board = board;
+        copy.BoardTop = BoardTop;
+
+        return &copy;
     }
 
 
@@ -123,7 +132,6 @@ struct Board
 
 int main()
 {
-
     Board game = Board();
     bool win = false;
     int pos;
