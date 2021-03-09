@@ -8,21 +8,41 @@ using namespace std;
 #define EXPLORATIONCONST 1.414214
 struct Node
 {
-    Board NodeBoard;
-    vector<Node*> ChildNodes; // Pointers to each child node
-    vector<Node*> ParentNodes; // Pointers to all parent nodes
+
+    vector<Node*> ChildNodes = {}; // Pointers to each child node
+    vector<Node*> ParentNodes = {}; // Pointers to all parent nodes
     unsigned int Hash;
 
-    int wins = 0;
-    int visits = 0;
+    short int wins = 0;
+    short int visits = 0;
+    short int depth;
+    char move;
     PlayerPiece PlayerTurn;
     
-    Node(Node* parent)
+    Node(Node* parent, int move)
     {
         ParentNodes.push_back(parent);
+        depth = parent -> depth + 1;
         PlayerTurn = (parent->PlayerTurn)==PlayerOne?PlayerTwo:PlayerOne;
 
     }
+    /*
+    Node* deep_copy()
+    {
+        Node copy = Node(ParentNodes[0]);
+
+        for(int i = 1; i != ParentNodes.size(); ++i)
+            copy.ParentNodes.push_back(ParentNodes[i]);
+
+        for(int i = 0; i != ChildNodes.size(); ++i)
+            copy.ChildNodes.push_back(ChildNodes[i]);
+        
+        copy.wins = wins;
+        copy.visits = visits;
+        copy.Hash = Hash;
+
+    }
+    */
 };
 
 struct TranspositionTable // contains map of all nodes which have been explored
@@ -30,11 +50,11 @@ struct TranspositionTable // contains map of all nodes which have been explored
     unordered_map<unsigned int, Node*> table = {};
 
     //Creates new node if hasn't been explored.
-    Node* create_node(unsigned int hash, Node* parent)
+    Node* create_node(unsigned int hash, Node* parent, char move)
     {
         if (table.find(hash) == table.end())
         {
-            table[hash] = new Node(parent);
+            table[hash] = new Node(parent, move);
         }
         return table[hash];
     }
@@ -68,11 +88,13 @@ class ZorbistHashing
 
 class MCTS
 {
-    Node RootNode = Node(nullptr);
+    Node RootNode = Node(nullptr, 0);
     Board RootBoard = Board();
 
     Node CurrentNode = RootNode;
     Board CurrentBoard = RootBoard;
+
+    TranspositionTable TransTable = TranspositionTable();
     
     MCTS()
     {
@@ -113,13 +135,51 @@ class MCTS
 
     Node* selection()
     {
+        double MaxUCT;
+        double uct;
+        Node* NextNode;
+        
+        while(CurrentNode.ChildNodes.size() != 0)
+        {
+            MaxUCT = 0;
+            
+            for(Node* node: CurrentNode.ChildNodes)
+            {
+                
+                if (calc_UCT(*node)>MaxUCT)
+                {
+                    NextNode = node;
+                    
+                }
+            }
 
+            CurrentBoard.drop_piece(NextNode-> move, NextNode -> PlayerTurn);
+        }
 
+        return NextNode;
+
+        /*
+       double max_uct = 0; 
+       double uct;
+       Node* node;
+       for(pair<unsigned int, Node*> NodePair: TransTable.table)
+       {
+           uct = calc_UCT((*NodePair.second));
+           if ( uct > max_uct) 
+           {
+               node = NodePair.second;
+               max_uct = uct;
+           }
+       }
+
+       return node;
+        */
     }
 
 
     PlayerPiece simulation()
     {
+        
 
     }
 
