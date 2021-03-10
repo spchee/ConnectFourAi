@@ -3,6 +3,7 @@ using namespace std;
 #include <vector>
 #include <unordered_map>
 #include <random>
+#include <algorithm>
 #include "board.h"
 
 #define EXPLORATIONCONST 1.414214
@@ -15,6 +16,7 @@ struct Node
 
     short int wins = 0;
     short int visits = 0;
+    bool expanded = false;
     short int depth;
     char move;
     PlayerPiece PlayerTurn;
@@ -23,7 +25,7 @@ struct Node
     {
         ParentNodes.push_back(parent);
         depth = parent -> depth + 1;
-        PlayerTurn = (parent->PlayerTurn)==PlayerOne?PlayerTwo:PlayerOne;
+        PlayerTurn = ((parent->PlayerTurn)==PlayerOne)?PlayerTwo:PlayerOne;
 
     }
     /*
@@ -64,6 +66,8 @@ class ZorbistHashing
 {
     
     array<array<unsigned int,2>,42> ZorbistTable = {};
+
+    public:
     ZorbistHashing()
     {
         random_device rd;
@@ -77,7 +81,6 @@ class ZorbistHashing
              ZorbistTable[i][1] = distrib(gen);
         }
     }
-    public:
     unsigned int get_zorbist_hash(PlayerPiece player, int x, int y, unsigned int hash)
     {
         
@@ -96,6 +99,7 @@ class MCTS
 
     TranspositionTable TransTable = TranspositionTable();
     
+    ZorbistHashing HashGen = ZorbistHashing();
     MCTS()
     {
         RootNode.Hash = 0;
@@ -133,30 +137,30 @@ class MCTS
         return UCT;
     }
 
-    Node* selection()
+    void selection()
     {
         double MaxUCT;
         double uct;
         Node* NextNode;
         
-        while(CurrentNode.ChildNodes.size() != 0)
+        while(CurrentNode.expanded = true)
         {
             MaxUCT = 0;
             
             for(Node* node: CurrentNode.ChildNodes)
             {
-                
-                if (calc_UCT(*node)>MaxUCT)
+                uct = calc_UCT(*node);
+                if (uct>MaxUCT)
                 {
                     NextNode = node;
-                    
+                    MaxUCT = uct;
                 }
             }
+            
 
             CurrentBoard.drop_piece(NextNode-> move, NextNode -> PlayerTurn);
+            CurrentNode = *NextNode;
         }
-
-        return NextNode;
 
         /*
        double max_uct = 0; 
@@ -176,10 +180,59 @@ class MCTS
         */
     }
 
+    void explansion()
+    {
+        
+        vector<int> ValidMoves = get_moves();
+        unsigned int NewHash;
+        Node* pNewChild;
+        for(int move: ValidMoves)
+        {
+            NewHash = HashGen.get_zorbist_hash((CurrentNode.PlayerTurn==PlayerOne)?PlayerTwo:PlayerOne, move, CurrentBoard.BoardTop[move], CurrentNode.Hash);
+            pNewChild = TransTable.create_node(NewHash, &CurrentNode, (char) move );
+
+            // check if the node already exists as a child node before adding.
+            if (find(CurrentNode.ChildNodes.begin(), CurrentNode.ChildNodes.end(),pNewChild)==CurrentNode.ChildNodes.end())
+            {
+                CurrentNode.ChildNodes.push_back(pNewChild);
+            }
+        }
+
+        CurrentNode.expanded = true;
+    }
+
 
     PlayerPiece simulation()
     {
+
+        bool complete = false;
+        for(Node* ChildNode: CurrentNode.ChildNodes)
+        {
+            CurrentNode = *ChildNode;
+            while(!complete) 
+            {
+                vector<int> ValidMoves = get_moves();
+
+                random_device rd;
+                mt19937 gen(rd());
+                uniform_int_distribution<> distrib(0,ValidMoves.size()-1);
+                int move =  distrib(gen);
+                
+                unsigned int NewHash = HashGen.get_zorbist_hash((CurrentNode.PlayerTurn==PlayerOne)?PlayerTwo:PlayerOne, 
+                                                                move, CurrentBoard.BoardTop[move], CurrentNode.Hash);
+                TransTable.create_node(NewHash, &CurrentNode, (char) move);
+
+
+
+            }
+
+
+        }
+
+        // will randomly play until game is complete
         
+        
+
 
     }
 
