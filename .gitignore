@@ -1,1 +1,5 @@
 board
+.editorconfig
+.vscode/.clang-format
+.vscode/settings.json
+.vscode/settings.json
