@@ -96,7 +96,7 @@ class MCTS
   Board RootBoard = Board();
 
   Node CurrentNode = RootNode;
-  Board CurrentBoard = RootBoard;
+  Board CurrentBoard = *RootBoard.deep_copy();
 
   TranspositionTable TransTable = TranspositionTable();
 
@@ -208,6 +208,7 @@ class MCTS
     int move;
     unsigned int NewHash;
     Node *pNewChild;
+    Board SelectedNodeBoard = *CurrentBoard.deep_copy();
 
     // TODO
     // Make it so it changes the board state after changing current node
@@ -235,12 +236,16 @@ class MCTS
         }
 
         CurrentNode = *pNewChild;
+        CurrentBoard.drop_piece(CurrentNode.move, CurrentNode.PlayerTurn);
+
+        if(CurrentBoard.check_win(CurrentNode.move, CurrentNode.PlayerTurn) ||
+           equal(CurrentBoard.BoardTop.begin() + 1, CurrentBoard.BoardTop.end(), CurrentBoard.BoardTop.begin()))
+          complete = true;
       }
+
+      // will randomly play until game is complete
     }
-
-    // will randomly play until game is complete
   }
-
   bool backpropagation()
   {
   }
