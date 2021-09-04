@@ -1,6 +1,14 @@
 {
     "files.associations": {
         "cmath": "cpp",
-        "iostream": "cpp"
-    }
+        "iostream": "cpp",
+        "unordered_map": "cpp"
+    },
+    "launch": {
+        "configurations": [],
+        "compounds": []
+    },
+    "editor.formatOnSave": true,
+    "clang-format.language.cpp.enable": true,
+    "clang-format.assumeFilename": ".clang-format"
 }

@@ -1,5 +1,8 @@
 using namespace std;
+#include "TranspositionTable.h"
+#include "ZorbistHashing.h"
 #include "board.h"
+#include "node.h"
 
 #include <algorithm>
 #include <array>
@@ -8,87 +11,6 @@ using namespace std;
 #include <vector>
 
 #define EXPLORATIONCONST 1.414214
-struct Node
-{
-
-  // TODO
-  // change ChildNodes to a set or map rather than a vector
-  vector<Node *> ChildNodes = {};  // Pointers to each child node
-  vector<Node *> ParentNodes = {}; // Pointers to all parent nodes
-  unsigned int Hash;
-
-  short int wins = 0;
-  short int visits = 0;
-  bool expanded = false;
-  short int depth;
-  char move;
-  PlayerPiece PlayerTurn;
-
-  Node(Node *parent, int move)
-  {
-    ParentNodes.push_back(parent);
-    depth = parent->depth + 1;
-    PlayerTurn = ((parent->PlayerTurn) == PlayerOne) ? PlayerTwo : PlayerOne;
-  }
-  /*
-  Node* deep_copy()
-  {
-      Node copy = Node(ParentNodes[0]);
-
-      for(int i = 1; i != ParentNodes.size(); ++i)
-          copy.ParentNodes.push_back(ParentNodes[i]);
-
-      for(int i = 0; i != ChildNodes.size(); ++i)
-          copy.ChildNodes.push_back(ChildNodes[i]);
-
-      copy.wins = wins;
-      copy.visits = visits;
-      copy.Hash = Hash;
-
-  }
-  */
-};
-
-struct TranspositionTable // contains map of all nodes which have been explored
-{
-  unordered_map<unsigned int, Node *> table = {};
-
-  // Creates new node if hasn't been explored.
-  Node *create_node(unsigned int hash, Node *parent, char move)
-  {
-    if(table.find(hash) == table.end())
-    {
-      table[hash] = new Node(parent, move);
-    }
-    return table[hash];
-  }
-};
-
-class ZorbistHashing
-{
-
-  array<array<unsigned int, 2>, 42> ZorbistTable = {};
-
-public:
-  ZorbistHashing()
-  {
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_int_distribution<> distrib(1, 4294967295);
-
-    // generates a random number for each piece in each position
-    for(int i = 0; i != 42; ++i)
-    {
-      ZorbistTable[i][0] = distrib(gen);
-      ZorbistTable[i][1] = distrib(gen);
-    }
-  }
-  unsigned int get_zorbist_hash(PlayerPiece player, int x, int y, unsigned int hash)
-  {
-
-    return ZorbistTable[x + y * 7][player] ^ hash;
-  }
-};
 
 class MCTS
 {
@@ -119,6 +41,7 @@ class MCTS
     return ValidMoves;
   }
 
+  // calculates the UCT score of a particular node
   double calc_UCT(Node node)
   {
     /*  UCT normally only works for trees where nodes have a single parent,
@@ -177,6 +100,7 @@ class MCTS
     */
   }
 
+  // will get all valid movies and expand each of them
   void explansion()
   {
 
@@ -213,7 +137,7 @@ class MCTS
     // TODO
     // Make it so it changes the board state after changing current node
     // Implement backpropagation after each child finishes exploring
-    for(Node *pChildNode: CurrentNode.ChildNodes) // note sure if this will work.
+    for(Node *pChildNode: CurrentNode.ChildNodes) // not sure if this will work.
     {
       CurrentNode = *pChildNode;
       complete = false;
@@ -221,38 +145,54 @@ class MCTS
       {
         vector<int> ValidMoves = get_moves();
 
-        random_device rd;
-        mt19937 gen(rd());
-        uniform_int_distribution<> distrib(0, ValidMoves.size() - 1);
-        move = distrib(gen);
-
-        NewHash = HashGen.get_zorbist_hash((CurrentNode.PlayerTurn == PlayerOne) ? PlayerTwo : PlayerOne, move, CurrentBoard.BoardTop[move],
-                                           CurrentNode.Hash);
-        pNewChild = TransTable.create_node(NewHash, &CurrentNode, (char) move);
-
-        if(find(CurrentNode.ChildNodes.begin(), CurrentNode.ChildNodes.end(), pNewChild) == CurrentNode.ChildNodes.end())
+        // if there are no valid moves, complete
+        if(ValidMoves.size() == 0)
         {
-          CurrentNode.ChildNodes.push_back(pNewChild);
+          complete = true;
         }
 
-        CurrentNode = *pNewChild;
-        CurrentBoard.drop_piece(CurrentNode.move, CurrentNode.PlayerTurn);
+        else
+        {
 
-        if(CurrentBoard.check_win(CurrentNode.move, CurrentNode.PlayerTurn) ||
-           equal(CurrentBoard.BoardTop.begin() + 1, CurrentBoard.BoardTop.end(), CurrentBoard.BoardTop.begin()))
-          complete = true;
+          // randomly selects a valid move
+          random_device rd;
+          mt19937 gen(rd());
+          uniform_int_distribution<> distrib(0, ValidMoves.size() - 1);
+          move = distrib(gen);
+
+          // Gens zorbist hash to adds it to the transposition table
+          NewHash = HashGen.get_zorbist_hash((CurrentNode.PlayerTurn == PlayerOne) ? PlayerTwo : PlayerOne, move,
+                                             CurrentBoard.BoardTop[move], CurrentNode.Hash);
+          pNewChild = TransTable.create_node(NewHash, &CurrentNode, (char) move);
+
+          // Add to ChildNodes if it isn't already there.
+          if(find(CurrentNode.ChildNodes.begin(), CurrentNode.ChildNodes.end(), pNewChild) == CurrentNode.ChildNodes.end())
+          {
+            CurrentNode.ChildNodes.push_back(pNewChild);
+          }
+
+          CurrentNode = *pNewChild;
+          CurrentBoard.drop_piece(CurrentNode.move, CurrentNode.PlayerTurn);
+
+          if(CurrentBoard.check_win(CurrentNode.move, CurrentNode.PlayerTurn) ||
+             equal(CurrentBoard.BoardTop.begin() + 1, CurrentBoard.BoardTop.end(), CurrentBoard.BoardTop.begin()))
+            complete = true;
+        }
       }
-
       // will randomly play until game is complete
     }
   }
-  bool backpropagation()
+  bool backpropagation(Node *pLeafNode, PlayerPiece winner)
   {
+    while(pLeafNode != &RootNode)
+    {
+    }
   }
 
   void play_move()
   {
     // change root node
-    // playesr turn
+    // players turn
+    // delete all nodes with a depth less than root to free up memory.
   }
 };
